@@ -13,7 +13,8 @@ namespace DinSko.Repositories
         public IEnumerable<Product> GetAll()
         {
             List<Product> products = new List<Product>(); // an empty list to collect all products from the database
-            using (SqlConnection connection = new SqlConnection(_connectionString)) // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open(); // opens the connection
                 string sql = "SELECT ProductId, Name, Description, Price FROM Product"; // SQL query to select all products from the Product table
@@ -23,12 +24,12 @@ namespace DinSko.Repositories
                     {
                         while (reader.Read()) // while loop reads each row of the result set
                         {
-                            Product product = new Product();
+                            Product product = new Product(); // Create a new Product object for the current row.
                             product.ProductId = reader.GetInt32(0); // 0 means the first column in the result set, which is ProductId
                             product.Name = reader.GetString(1); // 1 means the second column in the result set, which is Name
                             product.Description = reader.IsDBNull(2) ? null : reader.GetString(2); // 2 means the third column in the result set, which is Description
                             product.Price = reader.GetDecimal(3); // 3 means the fourth column in the result set, which is Price
-                            products.Add(product);
+                            products.Add(product); // Add the Product to the list.
                         }
                     }
                 }
@@ -39,16 +40,16 @@ namespace DinSko.Repositories
         public Product GetById(int id)
         {
             Product product = null; // initialize product to null
-            using (SqlConnection connection = new SqlConnection(_connectionString)) // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                connection.Open(); // opens the connection
+                connection.Open(); 
                 string sql = "SELECT ProductId, Name, Description, Price FROM Product WHERE ProductId = @ProductId"; // SQL query to select a product by id from the Product table
-                using (SqlCommand command = new SqlCommand(sql, connection)) // SQL command to execute the query
+                using (SqlCommand command = new SqlCommand(sql, connection)) 
                 {
                     command.Parameters.AddWithValue("@ProductId", id); // add parameter to the SQL command
                     using (SqlDataReader reader = command.ExecuteReader()) // SQL data reader to read the data from the database
                     {
-                        if (reader.Read()) // if there is a row in the result set
+                        if (reader.Read()) // If there is a row in the result set
                         {
                             product = new Product();
                             product.ProductId = reader.GetInt32(0); // 0 means the first column in the result set, which is ProductId
@@ -64,11 +65,11 @@ namespace DinSko.Repositories
 
         public void Add(Product product)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString)) // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            using (SqlConnection connection = new SqlConnection(_connectionString)) 
             {
-                connection.Open(); // opens the connection
+                connection.Open(); 
                 string sql = "INSERT INTO Product (Name, Description, Price) " + "VALUES (@Name, @Description, @Price)"; // SQL query to add a product.
-                using (SqlCommand command = new SqlCommand(sql, connection)) // SQL command to execute the query
+                using (SqlCommand command = new SqlCommand(sql, connection)) 
                 {
                     command.Parameters.AddWithValue("@Name", product.Name); // add the product name as a parameter.
                     command.Parameters.AddWithValue("@Description", product.Description); // add the product description as a parameter.
@@ -80,12 +81,12 @@ namespace DinSko.Repositories
 
         public void Update(Product product)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString)) // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            using (SqlConnection connection = new SqlConnection(_connectionString)) 
             {
-                connection.Open(); // opens the connection
+                connection.Open(); 
                 string sql = "UPDATE Product " + "SET Name = @Name, Description = @Description, Price = @Price" + 
                     " WHERE ProductId = @ProductId"; // SQL query to update a product by its ID.
-                using (SqlCommand command = new SqlCommand(sql, connection)) // SQL command to execute the query
+                using (SqlCommand command = new SqlCommand(sql, connection)) 
                 {
                     command.Parameters.AddWithValue("@ProductId", product.ProductId); // add the product ID as a parameter
                     command.Parameters.AddWithValue("@Name", product.Name);// add the updated product name.
@@ -98,11 +99,11 @@ namespace DinSko.Repositories
 
         public void Delete(int id)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString)) // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            using (SqlConnection connection = new SqlConnection(_connectionString)) 
             {
-                connection.Open(); // opens the connection
+                connection.Open(); 
                 string sql = "DELETE FROM Product WHERE ProductId = @ProductId "; // SQL query to delete a product by its ID.
-                using (SqlCommand command = new SqlCommand(sql, connection)) // SQL command to execute the query
+                using (SqlCommand command = new SqlCommand(sql, connection)) 
                 {
                     command.Parameters.AddWithValue("@ProductId", id); // add the product ID as a parameter.
                     command.ExecuteNonQuery(); // execute the SQL command and delete the product from the database.
