@@ -12,8 +12,8 @@ namespace DinSko.Repositories
 
         public IEnumerable<Product> GetAll()
         {
-            List<Product> products = new List<Product>(); // an empty list to colect all products from the database
-            using (SqlConnection connection = new SqlConnection(_connectionString)) // Create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            List<Product> products = new List<Product>(); // an empty list to collect all products from the database
+            using (SqlConnection connection = new SqlConnection(_connectionString)) // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
             {
                 connection.Open(); // opens the connection
                 string sql = "SELECT ProductId, Name, Description, Price FROM Product"; // SQL query to select all products from the Product table
@@ -39,7 +39,7 @@ namespace DinSko.Repositories
         public Product GetById(int id)
         {
             Product product = null; // initialize product to null
-            using (SqlConnection connection = new SqlConnection(_connectionString)) // Create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            using (SqlConnection connection = new SqlConnection(_connectionString)) // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
             {
                 connection.Open(); // opens the connection
                 string sql = "SELECT ProductId, Name, Description, Price FROM Product WHERE ProductId = @ProductId"; // SQL query to select a product by id from the Product table
@@ -53,7 +53,7 @@ namespace DinSko.Repositories
                             product = new Product();
                             product.ProductId = reader.GetInt32(0); // 0 means the first column in the result set, which is ProductId
                             product.Name = reader.GetString(1); // 1 means the second column in the result set, which is Name
-                            product.Description = reader.IsDBNull(2) ? null : reader.GetString(2); // If Description in DB is NULL, set it to null - otherwise, read it as a string.
+                            product.Description = reader.IsDBNull(2) ? null : reader.GetString(2); // if Description in DB is NULL, set it to null - otherwise, read it as a string.
                             product.Price = reader.GetDecimal(3); // 3 means the fourth column in the result set, which is Price
                         }
                     }
@@ -64,26 +64,50 @@ namespace DinSko.Repositories
 
         public void Add(Product product)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString)) // Create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            using (SqlConnection connection = new SqlConnection(_connectionString)) // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
             {
                 connection.Open(); // opens the connection
-                string sql = "INSERT INTO Product (Name, Description, Price) " + "VALUES (@Name, @Description, @Price)";
+                string sql = "INSERT INTO Product (Name, Description, Price) " + "VALUES (@Name, @Description, @Price)"; // SQL query to add a product.
                 using (SqlCommand command = new SqlCommand(sql, connection)) // SQL command to execute the query
                 {
-                    command.Parameters.AddWithValue("@Name", product.Name); // Add the product name as a parameter.
-                    command.Parameters.AddWithValue("@Description", product.Description); // Add the product description as a parameter.
-                    command.Parameters.AddWithValue("@Price", product.Price); // Add the product price as a parameter.
-                    command.ExecuteNonQuery(); // Execute the SQL command and add the product to the database.
+                    command.Parameters.AddWithValue("@Name", product.Name); // add the product name as a parameter.
+                    command.Parameters.AddWithValue("@Description", product.Description); // add the product description as a parameter.
+                    command.Parameters.AddWithValue("@Price", product.Price); // add the product price as a parameter.
+                    command.ExecuteNonQuery(); // execute the SQL command and add the product to the database.
                 }
             }
         }
 
         public void Update(Product product)
         {
+            using (SqlConnection connection = new SqlConnection(_connectionString)) // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            {
+                connection.Open(); // opens the connection
+                string sql = "UPDATE Product " + "SET Name = @Name, Description = @Description, Price = @Price" + 
+                    " WHERE ProductId = @ProductId"; // SQL query to update a product by its ID.
+                using (SqlCommand command = new SqlCommand(sql, connection)) // SQL command to execute the query
+                {
+                    command.Parameters.AddWithValue("@ProductId", product.ProductId); // add the product ID as a parameter
+                    command.Parameters.AddWithValue("@Name", product.Name);// add the updated product name.
+                    command.Parameters.AddWithValue("@Description", product.Description); // add the updated product description.
+                    command.Parameters.AddWithValue("@Price", product.Price); // add the updated product price.
+                    command.ExecuteNonQuery(); // execute the SQL command and update the product in the database.
+                }
+            }
         }
 
         public void Delete(int id)
         {
+            using (SqlConnection connection = new SqlConnection(_connectionString)) // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
+            {
+                connection.Open(); // opens the connection
+                string sql = "DELETE FROM Product WHERE ProductId = @ProductId "; // SQL query to delete a product by its ID.
+                using (SqlCommand command = new SqlCommand(sql, connection)) // SQL command to execute the query
+                {
+                    command.Parameters.AddWithValue("@ProductId", id); // add the product ID as a parameter.
+                    command.ExecuteNonQuery(); // execute the SQL command and delete the product from the database.
+                }
+            }
         }
     }
 }
