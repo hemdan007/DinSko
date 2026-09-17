@@ -79,11 +79,13 @@ namespace DinSko.Repositories
                     {
                         while (reader.Read()) // read each cart item from the result set.
                         {
-                            CartItem cartItem = new CartItem(); // create a new CartItem object for the current row.
-                            cartItem.CartItemId = reader.GetInt32(0); // 0 means the first column, CartItemId.
-                            cartItem.CartId = reader.GetInt32(1); // 1 means the second column, CartId.
-                            cartItem.ProductVariantId = reader.GetInt32(2); // 2 means the third column, ProductVariantId.
-                            cartItem.Quantity = reader.GetInt32(3); // 3 means the fourth column, Quantity.
+                            CartItem cartItem = new CartItem() // create a new CartItem object for the current row.
+                            {
+                                CartItemId = reader.GetInt32(0), // 0 means the first column, CartItemId.
+                                CartId = reader.GetInt32(1), // 1 means the second column, CartId.
+                                ProductVariantId = reader.GetInt32(2), // 2 means the third column, ProductVariantId.
+                                Quantity = reader.GetInt32(3) // 3 means the fourth column, Quantity.
+                            };
                             cartItems.Add(cartItem); // add the CartItem to the list.
                         }
                     }

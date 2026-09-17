@@ -17,18 +17,20 @@ namespace DinSko.Repositories
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open(); // opens the connection
-                string sql = "SELECT ProductId, Name, Description, Price FROM Product"; // SQL query to select all products from the Product table
+                string sql = "SELECT ProductId, Name, Description, Price" + " FROM Product"; // SQL query to select all products from the Product table
                 using (SqlCommand command = new SqlCommand(sql, connection)) // SQL command to execute the query
                 {
                     using (SqlDataReader reader = command.ExecuteReader()) // SQL data reader to read the data from the database
                     {
                         while (reader.Read()) // while loop reads each row of the result set
                         {
-                            Product product = new Product(); // Create a new Product object for the current row.
-                            product.ProductId = reader.GetInt32(0); // 0 means the first column in the result set, which is ProductId
-                            product.Name = reader.GetString(1); // 1 means the second column in the result set, which is Name
-                            product.Description = reader.IsDBNull(2) ? null : reader.GetString(2); // 2 means the third column in the result set, which is Description
-                            product.Price = reader.GetDecimal(3); // 3 means the fourth column in the result set, which is Price
+                            Product product = new Product() // Create a new Product object for the current row.
+                            {
+                                ProductId = reader.GetInt32(0), // 0 means the first column in the result set, which is ProductId
+                                Name = reader.GetString(1), // 1 means the second column in the result set, which is Name
+                                Description = reader.IsDBNull(2) ? null : reader.GetString(2), // 2 means the third column in the result set, which is Description
+                                Price = reader.GetDecimal(3) // 3 means the fourth column in the result set, which is Price
+                            };
                             products.Add(product); // Add the Product to the list.
                         }
                     }
@@ -43,7 +45,7 @@ namespace DinSko.Repositories
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open(); 
-                string sql = "SELECT ProductId, Name, Description, Price FROM Product WHERE ProductId = @ProductId"; // SQL query to select a product by id from the Product table
+                string sql = "SELECT ProductId, Name, Description, Price FROM Product " + "WHERE ProductId = @ProductId"; // SQL query to select a product by id from the Product table
                 using (SqlCommand command = new SqlCommand(sql, connection)) 
                 {
                     command.Parameters.AddWithValue("@ProductId", id); // add parameter to the SQL command
@@ -51,11 +53,13 @@ namespace DinSko.Repositories
                     {
                         if (reader.Read()) // If there is a row in the result set
                         {
-                            product = new Product();
-                            product.ProductId = reader.GetInt32(0); // 0 means the first column in the result set, which is ProductId
-                            product.Name = reader.GetString(1); // 1 means the second column in the result set, which is Name
-                            product.Description = reader.IsDBNull(2) ? null : reader.GetString(2); // if Description in DB is NULL, set it to null - otherwise, read it as a string.
-                            product.Price = reader.GetDecimal(3); // 3 means the fourth column in the result set, which is Price
+                            product = new Product() // Create a new Product object for the current row.
+                            {
+                                ProductId = reader.GetInt32(0), 
+                                Name = reader.GetString(1), 
+                                Description = reader.IsDBNull(2) ? null : reader.GetString(2), 
+                                Price = reader.GetDecimal(3) 
+                            };
                         }
                     }
                 }
@@ -85,7 +89,7 @@ namespace DinSko.Repositories
             {
                 connection.Open(); 
                 string sql = "UPDATE Product " + "SET Name = @Name, Description = @Description, Price = @Price" + 
-                    " WHERE ProductId = @ProductId"; // SQL query to update a product by its ID.
+                    "WHERE ProductId = @ProductId"; // SQL query to update a product by its ID.
                 using (SqlCommand command = new SqlCommand(sql, connection)) 
                 {
                     command.Parameters.AddWithValue("@ProductId", product.ProductId); // add the product ID as a parameter
@@ -102,7 +106,7 @@ namespace DinSko.Repositories
             using (SqlConnection connection = new SqlConnection(_connectionString)) 
             {
                 connection.Open(); 
-                string sql = "DELETE FROM Product WHERE ProductId = @ProductId "; // SQL query to delete a product by its ID.
+                string sql = "DELETE FROM Product" + " WHERE ProductId = @ProductId "; // SQL query to delete a product by its ID.
                 using (SqlCommand command = new SqlCommand(sql, connection)) 
                 {
                     command.Parameters.AddWithValue("@ProductId", id); // add the product ID as a parameter.

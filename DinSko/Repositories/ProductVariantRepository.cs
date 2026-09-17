@@ -14,21 +14,23 @@ namespace DinSko.Repositories
         {
             List<ProductVariant> productVariants = new List<ProductVariant>(); // an empty list to collect all the product variants from the database
             // create a connection to the database using the connectionString, The using statement automatically closes the connection after use.
-                using (SqlConnection connection = new SqlConnection(_connectionString)) 
+            using (SqlConnection connection = new SqlConnection(_connectionString)) 
             {
                 connection.Open(); // opens the connection
-                string sql = "SELECT ProductVariantId, ProductId, Size, Stock FROM ProductVariant"; // SQL query to select all productVariants from the ProductVariant table
+                string sql = "SELECT ProductVariantId, ProductId, Size, Stock" + " FROM ProductVariant"; // SQL query to select all productVariants from the ProductVariant table
                 using (SqlCommand command = new SqlCommand(sql, connection)) // SQL command to execute the query
                 {
                     using (SqlDataReader reader = command.ExecuteReader()) // SQL data reader to read the data from the database
                     {
                         while (reader.Read()) // while loop reads each row of the result set
                         {
-                            ProductVariant productVariant = new ProductVariant(); // create a new ProductVariant object for the current row.
-                            productVariant.ProductVariantId = reader.GetInt32(0); // 0 means the first column in the result set, which is ProductVariantId
-                            productVariant.ProductId = reader.GetInt32(1); // 1 means the second column in the result set, which is ProductId
-                            productVariant.Size = reader.GetInt32(2); // 2 means the third column in the result set, which is Size
-                            productVariant.Stock = reader.GetInt32(3); // 3 means the fourth column in the result set, which is Stock
+                            ProductVariant productVariant = new ProductVariant() // create a new ProductVariant object for the current row.
+                            {
+                                ProductVariantId = reader.GetInt32(0), // 0 means the first column in the result set, which is ProductVariantId
+                                ProductId = reader.GetInt32(1), // 1 means the second column in the result set, which is ProductId
+                                Size = reader.GetInt32(2), // 2 means the third column in the result set, which is Size
+                                Stock = reader.GetInt32(3) // 3 means the fourth column in the result set, which is Stock
+                            };
                             productVariants.Add(productVariant); // add the ProductVariant to the list.
                         }
                     }
@@ -53,11 +55,13 @@ namespace DinSko.Repositories
                     {
                         if (reader.Read()) // If there is a row in the result set.
                         {
-                            productVariant = new ProductVariant(); // create a new ProductVariant object for the row.
-                            productVariant.ProductVariantId = reader.GetInt32(0); // 0 means the first column, ProductVariantId.
-                            productVariant.ProductId = reader.GetInt32(1); // 1 means the second column, ProductId.
-                            productVariant.Size = reader.GetInt32(2); // 2 means the third column, Size.
-                            productVariant.Stock = reader.GetInt32(3); // 3 means the fourth column, Stock.
+                            productVariant = new ProductVariant // create a new ProductVariant object for the row.
+                            {
+                                ProductVariantId = reader.GetInt32(0), 
+                                ProductId = reader.GetInt32(1), 
+                                Size = reader.GetInt32(2), 
+                                Stock = reader.GetInt32(3)
+                            };
                         }
                     }
                 }
@@ -80,12 +84,14 @@ namespace DinSko.Repositories
                     {
                         while (reader.Read()) // read each product variant from the result set.
                         {
-                            ProductVariant productVariant = new ProductVariant(); // create a new ProductVariant object for the current row.
-                            productVariant.ProductVariantId = reader.GetInt32(0); // 0 means the first column, ProductVariantId.
-                            productVariant.ProductId = reader.GetInt32(1); // 1 means the second column, ProductId.
-                            productVariant.Size = reader.GetInt32(2); // 2 means the third column, Size.
-                            productVariant.Stock = reader.GetInt32(3); // 3 means the fourth column, Stock.
-                            productVariants.Add(productVariant); // add the ProductVariant to the list.
+                            ProductVariant productVariant = new ProductVariant() // create a new ProductVariant object for the current row.
+                            {
+                                ProductVariantId = reader.GetInt32(0), 
+                                ProductId = reader.GetInt32(1), 
+                                Size = reader.GetInt32(2), 
+                                Stock = reader.GetInt32(3)
+                            };
+                            productVariants.Add(productVariant);
                         }
                     }
                 }
@@ -132,7 +138,7 @@ namespace DinSko.Repositories
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                string sql = "DELETE FROM ProductVariant WHERE ProductVariantId = @ProductVariantId"; // SQL query to delete a product variant by its ID.
+                string sql = "DELETE FROM ProductVariant" + " WHERE ProductVariantId = @ProductVariantId"; // SQL query to delete a product variant by its ID.
                 using (SqlCommand command = new SqlCommand(sql, connection)) 
                 {
                     command.Parameters.AddWithValue("@ProductVariantId", id); // add the product variant ID as a parameter.
