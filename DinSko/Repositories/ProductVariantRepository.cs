@@ -55,7 +55,7 @@ namespace DinSko.Repositories
                     {
                         if (reader.Read()) // If there is a row in the result set.
                         {
-                            productVariant = new ProductVariant // create a new ProductVariant object for the row.
+                            productVariant = new ProductVariant() // create a new ProductVariant object for the row.
                             {
                                 ProductVariantId = reader.GetInt32(0), 
                                 ProductId = reader.GetInt32(1), 
