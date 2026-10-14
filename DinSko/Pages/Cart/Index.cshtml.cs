@@ -27,7 +27,7 @@ namespace DinSko.Pages.Cart
         public List<CartItemViewModel> Items { get; set; } =
             new List<CartItemViewModel>();
 
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         public class CartItemViewModel
         {

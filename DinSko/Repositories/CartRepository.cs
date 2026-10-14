@@ -156,118 +156,142 @@ namespace DinSko.Repositories
         }
         public bool AddItemIfInStock(CartItem item)
         {
-                using (SqlConnection connection = new SqlConnection(_connectionString))
+            // Reject invalid input before accessing the database
+            if (item.CartId <= 0 ||
+                item.ProductVariantId <= 0 ||
+                item.Quantity < 1 ||
+                item.Quantity > 10)
+            {
+                return false;
+            }
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                using (SqlTransaction transaction = connection.BeginTransaction())
                 {
-                    connection.Open();
-
-                    // Start a transaction to check stock and add the item safely
-                    using (SqlTransaction transaction = connection.BeginTransaction())
+                    try
                     {
-                        try
+                        // Lock the product variant while checking its stock
+                        string stockSql =
+                            "SELECT Stock FROM ProductVariant WITH (UPDLOCK, HOLDLOCK) " +
+                            "WHERE ProductVariantId = @ProductVariantId";
+
+                        int stock;
+
+                        using (SqlCommand command =
+                            new SqlCommand(stockSql, connection, transaction))
                         {
-                            string stockSql =
-                                "SELECT Stock FROM ProductVariant " +
-                                "WHERE ProductVariantId = @ProductVariantId";
+                            command.Parameters.AddWithValue(
+                                "@ProductVariantId", item.ProductVariantId);
 
-                            int stock;
+                            object result = command.ExecuteScalar();
 
-                            using (SqlCommand command = new SqlCommand(stockSql, connection, transaction))
-                            {
-                                command.Parameters.AddWithValue("@ProductVariantId", item.ProductVariantId);
-
-                                object result = command.ExecuteScalar();
-
-                                // Check that the selected variant exists
-                                if (result == null || result == DBNull.Value)
-                                {
-                                    transaction.Rollback();
-                                    return false;
-                                }
-
-                                stock = Convert.ToInt32(result);
-                            }
-
-                            // Check that enough stock is available
-                            if (item.Quantity <= 0 || item.Quantity > stock)
+                            if (result == null || result == DBNull.Value)
                             {
                                 transaction.Rollback();
                                 return false;
                             }
 
-                            // Check whether this variant already exists in the cart
-                            string existingSql =
-                                "SELECT CartItemId, Quantity FROM CartItem " +
-                                "WHERE CartId = @CartId AND ProductVariantId = @ProductVariantId";
+                            stock = Convert.ToInt32(result);
+                        }
 
-                            int existingItemId = 0;
-                            int existingQuantity = 0;
+                        // Reject products with no available stock
+                        if (stock < 1 || item.Quantity > stock)
+                        {
+                            transaction.Rollback();
+                            return false;
+                        }
 
-                            using (SqlCommand command = new SqlCommand(existingSql, connection, transaction))
+                        // Lock the matching cart item while checking its quantity
+                        string existingSql =
+                            "SELECT CartItemId, Quantity FROM CartItem WITH (UPDLOCK, HOLDLOCK) " +
+                            "WHERE CartId = @CartId " +
+                            "AND ProductVariantId = @ProductVariantId";
+
+                        int existingItemId = 0;
+                        int existingQuantity = 0;
+
+                        using (SqlCommand command =
+                            new SqlCommand(existingSql, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@CartId", item.CartId);
+                            command.Parameters.AddWithValue(
+                                "@ProductVariantId", item.ProductVariantId);
+
+                            using (SqlDataReader reader = command.ExecuteReader())
                             {
-                                command.Parameters.AddWithValue("@CartId", item.CartId);
-                                command.Parameters.AddWithValue("@ProductVariantId", item.ProductVariantId);
-
-                                using (SqlDataReader reader = command.ExecuteReader())
+                                if (reader.Read())
                                 {
-                                    if (reader.Read())
-                                    {
-                                        existingItemId = reader.GetInt32(0);
-                                        existingQuantity = reader.GetInt32(1);
-                                    }
+                                    existingItemId = reader.GetInt32(0);
+                                    existingQuantity = reader.GetInt32(1);
                                 }
                             }
+                        }
 
-                            // Add to the existing quantity if the variant is already in the cart
-                            if (existingItemId > 0)
+                        // Calculate the total quantity after adding the item
+                        int newQuantity = existingQuantity + item.Quantity;
+
+                        // Enforce both the cart limit and available stock
+                        if (newQuantity > 10 || newQuantity > stock)
+                        {
+                            transaction.Rollback();
+                            return false;
+                        }
+
+                        if (existingItemId > 0)
+                        {
+                            // Update the existing cart item
+                            string updateSql =
+                                "UPDATE CartItem SET Quantity = @Quantity " +
+                                "WHERE CartItemId = @CartItemId AND CartId = @CartId";
+
+                            using (SqlCommand command =
+                                new SqlCommand(updateSql, connection, transaction))
                             {
-                                int newQuantity = existingQuantity + item.Quantity;
+                                command.Parameters.AddWithValue("@Quantity", newQuantity);
+                                command.Parameters.AddWithValue(
+                                    "@CartItemId", existingItemId);
+                                command.Parameters.AddWithValue("@CartId", item.CartId);
 
-                                if (newQuantity > stock)
+                                if (command.ExecuteNonQuery() != 1)
                                 {
                                     transaction.Rollback();
                                     return false;
                                 }
-
-                                string updateSql =
-                                    "UPDATE CartItem SET Quantity = @Quantity " +
-                                    "WHERE CartItemId = @CartItemId AND CartId = @CartId";
-
-                                using (SqlCommand command = new SqlCommand(updateSql, connection, transaction))
-                                {
-                                    command.Parameters.AddWithValue("@Quantity", newQuantity);
-                                    command.Parameters.AddWithValue("@CartItemId", existingItemId);
-                                    command.Parameters.AddWithValue("@CartId", item.CartId);
-                                    command.ExecuteNonQuery();
-                                }
                             }
-                            else
-                            {
-                                // Add a new item to the cart
-                                string insertSql =
-                                    "INSERT INTO CartItem (CartId, ProductVariantId, Quantity) " +
-                                    "VALUES (@CartId, @ProductVariantId, @Quantity)";
-
-                                using (SqlCommand command = new SqlCommand(insertSql, connection, transaction))
-                                {
-                                    command.Parameters.AddWithValue("@CartId", item.CartId);
-                                    command.Parameters.AddWithValue("@ProductVariantId", item.ProductVariantId);
-                                    command.Parameters.AddWithValue("@Quantity", item.Quantity);
-                                    command.ExecuteNonQuery();
-                                }
-                            }
-
-                            transaction.Commit();
-                            return true;
                         }
-                        catch
+                        else
                         {
-                            transaction.Rollback();
-                            throw;
+                            // Insert a new cart item
+                            string insertSql =
+                                "INSERT INTO CartItem (CartId, ProductVariantId, Quantity) " +
+                                "VALUES (@CartId, @ProductVariantId, @Quantity)";
+
+                            using (SqlCommand command =
+                                new SqlCommand(insertSql, connection, transaction))
+                            {
+                                command.Parameters.AddWithValue("@CartId", item.CartId);
+                                command.Parameters.AddWithValue(
+                                    "@ProductVariantId", item.ProductVariantId);
+                                command.Parameters.AddWithValue("@Quantity", item.Quantity);
+
+                                command.ExecuteNonQuery();
+                            }
                         }
+
+                        transaction.Commit();
+                        return true;
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
                     }
                 }
+            }
         }
-
         public bool UpdateItemQuantity(int cartId, int itemId, int quantity)
         {
             // Reject invalid quantities
