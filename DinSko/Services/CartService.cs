@@ -51,5 +51,18 @@ namespace DinSko.Services
         {
             _cartRepository.ClearCart(cartId);
         }
+        public bool AddItemIfInStock(CartItem item)
+        {
+            return _cartRepository.AddItemIfInStock(item);
+        }
+        public bool UpdateItemQuantity(int cartId, int itemId, int quantity)
+        {
+            return _cartRepository.UpdateItemQuantity(cartId, itemId, quantity);
+        }
+
+        public bool RemoveItemFromCart(int cartId, int itemId)
+        {
+            return _cartRepository.RemoveItemFromCart(cartId, itemId);
+        }
     }
 }

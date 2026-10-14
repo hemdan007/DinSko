@@ -12,5 +12,8 @@ namespace DinSko.Repositories
         void UpdateItem(CartItem item);
         void DeleteItem(int itemId);
         void ClearCart(int cartId);
+        bool AddItemIfInStock(CartItem item);
+        bool UpdateItemQuantity(int cartId, int itemId, int quantity);
+        bool RemoveItemFromCart(int cartId, int itemId);
     }
 }

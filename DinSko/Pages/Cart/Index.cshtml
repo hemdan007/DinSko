@@ -1,0 +1,94 @@
+﻿@page
+@model DinSko.Pages.Cart.IndexModel
+
+<h1>My Cart</h1>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p>@Model.Message</p>
+}
+
+@if (Model.Items.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Size</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td>@item.Size</td>
+                    <td>
+                        <!-- Update the quantity -->
+                        <form method="post"
+                              asp-page-handler="Update"
+                              class="d-flex gap-2">
+
+                            <input type="hidden"
+                                   name="itemId"
+                                   value="@item.CartItemId" />
+
+                            <input type="number"
+                                   name="quantity"
+                                   value="@item.Quantity"
+                                   min="1"
+                                   max="10"
+                                   class="form-control"
+                                   style="width: 90px;"
+                                   required />
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Update
+                            </button>
+                        </form>
+
+                        <small>Available stock: @item.Stock</small>
+                    </td>
+
+                    <td>@item.Price.ToString("0.00") DKK</td>
+
+                    <td>
+                        @((item.Price * item.Quantity).ToString("0.00")) DKK
+                    </td>
+
+                    <td>
+                        <!-- Remove the item from the cart -->
+                        <form method="post" asp-page-handler="Remove">
+                            <input type="hidden"
+                                   name="itemId"
+                                   value="@item.CartItemId" />
+
+                            <button type="submit"
+                                    class="btn btn-danger">
+                                Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>
+        Total:
+        @Model.Items.Sum(item => item.Price * item.Quantity).ToString("0.00")
+        DKK
+    </h4>
+}
+else
+{
+    <p>Your cart is empty.</p>
+}
+
+<a asp-page="/Index">Continue shopping</a>

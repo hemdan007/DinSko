@@ -1,10 +1,90 @@
 ﻿@page
 @model IndexModel
-@{
-    ViewData["Title"] = "Home page";
+
+<h1>DinSko Products</h1>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <p>Logged in as: @User.Identity.Name</p>
+    <p><a asp-page="/Cart/Index">View My Cart</a></p>
+}
+else
+{
+    <p>Not logged in. Please log in to add products to your cart.</p>
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@if (TempData["SuccessMessage"] != null)
+{
+    <p>@TempData["SuccessMessage"]</p>
+}
+
+@if (TempData["CartMessage"] != null)
+{
+    <p>@TempData["CartMessage"]</p>
+}
+
+@if (Model.ProductList.Any())
+{
+    <div class="row">
+        @foreach (var item in Model.ProductList)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Product.Name</h5>
+
+                        <p class="card-text">
+                            @(string.IsNullOrEmpty(item.Product.Description)
+                                ? "No description available."
+                                : item.Product.Description)
+                        </p>
+
+                        <p>
+                            <strong>Price:</strong>
+                            @item.Product.Price.ToString("0.00") DKK
+                        </p>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            @if (item.Variants.Any())
+                            {
+                                <form method="post" asp-page="/Cart/Index" asp-page-handler="Add">
+                                    <label>Size</label>
+
+                                    <select name="productVariantId" class="form-select">
+                                        @foreach (var variant in item.Variants)
+                                        {
+                                            <option value="@variant.ProductVariantId">
+                                                @variant.Size (Stock: @variant.Stock)
+                                            </option>
+                                        }
+                                    </select>
+
+                                    <label>Quantity</label>
+                                    <input type="number"
+                                           name="quantity"
+                                           value="1"
+                                           min="1"
+                                           max="10"
+                                           class="form-control" />
+
+                                    <button type="submit" class="btn btn-primary mt-2">
+                                        Add to Cart
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <p>Currently out of stock.</p>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No products are currently available.</p>
+}

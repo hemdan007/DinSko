@@ -1,9 +1,21 @@
 using DinSko.Repositories;
 using DinSko.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// store temporary login attempt data
+builder.Services.AddMemoryCache(); 
+
+// configure cookie authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login"; // use cookies to keep the user logged in
+    });
+
 
 // Dependency Injection for Repositories and Services
 
@@ -40,7 +52,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
-
+app.UseAuthentication(); // check the authentication cookie for the current user
 app.UseAuthorization();
 
 app.MapStaticAssets();

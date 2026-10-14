@@ -1,0 +1,25 @@
+﻿@page
+@model DinSko.Pages.Account.LoginModel
+
+<h1>Login</h1>
+
+<form method="post">
+
+    <div>
+        <label asp-for="Email"></label>
+        <input asp-for="Email" type="email" />
+    </div>
+
+    <div>
+        <label asp-for="Password"></label>
+        <input asp-for="Password" type="password" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <p>@Model.ErrorMessage</p>
+    }
+
+    <button type="submit">Login</button>
+
+</form>

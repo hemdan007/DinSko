@@ -1,0 +1,181 @@
+﻿@page
+@model DinSko.Pages.Account.RegisterModel
+
+<h1>Create Account</h1>
+
+<!-- Form sends the user data to the OnPost() method -->
+<form method="post">
+
+    <div>
+        <!-- Label for the user's name -->
+        <label asp-for="User.Name"></label>
+
+        <!-- Input field for the user's name -->
+        <input asp-for="User.Name" />
+        <span asp-validation-for="User.Name"></span>
+    </div>
+
+    <div>
+        <!-- Label and input field for the user's email -->
+        <label asp-for="User.Email"></label>
+
+        <input asp-for="User.Email" type="email" />
+        <span asp-validation-for="User.Email"></span>
+    </div>
+
+    <div>
+        <!-- Password input field -->
+        <label asp-for="User.Password">Password</label>
+
+        <input asp-for="User.Password"
+               type="password"
+               id="passwordInput"
+               autocomplete="new-password" />
+
+        <span asp-validation-for="User.Password"></span>
+
+        <!-- Pass'O meter result -->
+        <div>
+            <p>
+                Password Strength:
+                <strong id="strengthText">Not entered</strong>
+            </p>
+
+            <!-- Visual strength indicator -->
+            <progress id="strengthBar"
+                      value="0"
+                      max="100"
+                      style="width: 250px;">
+            </progress>
+
+            <!-- Feedback to help the user improve the password -->
+            <ul id="passwordFeedback">
+                <li>Enter a password to check its strength.</li>
+            </ul>
+        </div>
+
+        <p>
+            <!-- Password policy guidance -->
+            Password must be between 15 and 64 characters.<br />
+            Uppercase and lowercase letters are recommended.<br />
+            Do not use common passwords or personal information.<br />
+            Use a unique password that you do not reuse on other websites.
+        </p>
+    </div>
+
+    <!-- Submit the form and create the account -->
+    <button type="submit">Create Account</button>
+
+</form>
+
+@section Scripts {
+    <script>
+        // Get the password input and result elements
+        const passwordInput = document.getElementById("passwordInput");
+        const strengthText = document.getElementById("strengthText");
+        const strengthBar = document.getElementById("strengthBar");
+        const passwordFeedback = document.getElementById("passwordFeedback");
+
+        // Analyse the password whenever the user types
+        passwordInput.addEventListener("input", function () {
+            const password = passwordInput.value;
+            let score = 0;
+            const feedback = [];
+
+            // Check password length
+            if (password.length >= 15) {
+                score += 40;
+            } else if (password.length >= 12) {
+                score += 30;
+                feedback.push("Use at least 15 characters.");
+            } else if (password.length >= 8) {
+                score += 20;
+                feedback.push("Use a longer password.");
+            } else if (password.length > 0) {
+                score += 10;
+                feedback.push("Your password is too short.");
+            } else {
+                feedback.push("Enter a password to check its strength.");
+            }
+
+            // Check lowercase letters
+            if (/[a-z]/.test(password)) {
+                score += 10;
+            } else if (password.length > 0) {
+                feedback.push("Consider adding lowercase letters.");
+            }
+
+            // Check uppercase letters
+            if (/[A-Z]/.test(password)) {
+                score += 10;
+            } else if (password.length > 0) {
+                feedback.push("Consider adding uppercase letters.");
+            }
+
+            // Check numbers
+            if (/[0-9]/.test(password)) {
+                score += 10;
+            } else if (password.length > 0) {
+                feedback.push("Consider adding numbers.");
+            }
+
+            // Check special characters
+            if (/[^a-zA-Z0-9]/.test(password)) {
+                score += 10;
+            } else if (password.length > 0) {
+                feedback.push("Consider adding special characters.");
+            }
+
+            // Reduce the score for repeated characters
+            if (/(.)\1{3,}/.test(password)) {
+                score -= 15;
+                feedback.push("Avoid repeating the same character many times.");
+            }
+
+            // Reduce the score for predictable sequences
+            if (/1234|2345|3456|4567|5678|6789|abcd|bcde|cdef|qwerty/i.test(password)) {
+                score -= 15;
+                feedback.push("Avoid predictable sequences.");
+            }
+
+            // Keep the score between 0 and 100
+            score = Math.max(0, Math.min(100, score));
+
+            // Determine the password strength category
+            let strength = "";
+            let barColor = "";
+
+            if (password.length === 0) {
+                strength = "Not entered";
+                barColor = "#999999";
+            } else if (score < 40) {
+                strength = "Weak";
+                barColor = "#DC6262";
+            } else if (score < 70) {
+                strength = "Medium";
+                barColor = "#D6A63B";
+            } else {
+                strength = "Strong";
+                barColor = "#39976B";
+            }
+
+            // Display the category and visual indicator
+            strengthText.textContent = strength;
+            strengthBar.value = score;
+            strengthBar.style.accentColor = barColor;
+
+            // Display feedback safely
+            passwordFeedback.replaceChildren();
+
+            if (feedback.length === 0 && password.length > 0) {
+                feedback.push("Good score! Remember to use a unique password.");
+            }
+
+            feedback.forEach(function (message) {
+                const item = document.createElement("li");
+                item.textContent = message;
+                passwordFeedback.appendChild(item);
+            });
+        });
+    </script>
+}

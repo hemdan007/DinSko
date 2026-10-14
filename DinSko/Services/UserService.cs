@@ -20,6 +20,10 @@ namespace DinSko.Services
         {
             return _userRepository.GetById(id);
         }
+        public User GetByEmail(string email)
+        {
+            return _userRepository.GetByEmail(email);
+        }
 
         public void Add(User user)
         {
@@ -34,6 +38,10 @@ namespace DinSko.Services
         public void Delete(int id)
         {
             _userRepository.Delete(id);
+        }
+        public void ChangePassword(int userId, string passwordHash)
+        {
+            _userRepository.ChangePassword(userId, passwordHash);
         }
     }
 }

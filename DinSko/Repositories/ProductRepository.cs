@@ -24,7 +24,7 @@ namespace DinSko.Repositories
                     {
                         while (reader.Read()) // while loop reads each row of the result set
                         {
-                            Product product = new Product() // Create a new Product object for the current row.
+                            Product product = new Product() // create a new Product object for the current row.
                             {
                                 ProductId = reader.GetInt32(0), // 0 means the first column in the result set, which is ProductId
                                 Name = reader.GetString(1), // 1 means the second column in the result set, which is Name
@@ -53,7 +53,7 @@ namespace DinSko.Repositories
                     {
                         if (reader.Read()) // If there is a row in the result set
                         {
-                            product = new Product() // Create a new Product object for the current row.
+                            product = new Product() // create a new Product object for the current row.
                             {
                                 ProductId = reader.GetInt32(0), 
                                 Name = reader.GetString(1), 
