@@ -1,0 +1,106 @@
+﻿@page
+@model DinSko.Pages.Admin.ProductsModel
+
+<h1>Product Administration</h1>
+
+<p>Here you can manage products.</p>
+
+<!-- Form for creating a new product -->
+<h2>Add New Product</h2>
+
+<form method="post" asp-page-handler="Create">
+    <div class="mb-3">
+        <label asp-for="NewProduct.Name" class="form-label">Product Name</label>
+        <input asp-for="NewProduct.Name" class="form-control" />
+        <span asp-validation-for="NewProduct.Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="NewProduct.Description" class="form-label">Description</label>
+        <textarea asp-for="NewProduct.Description" class="form-control"></textarea>
+        <span asp-validation-for="NewProduct.Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="NewProduct.Price" class="form-label">Price</label>
+        <input asp-for="NewProduct.Price" type="number" step="0.01" min="0.01"
+               class="form-control" />
+        <span asp-validation-for="NewProduct.Price" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Product</button>
+</form>
+
+<hr />
+
+<!-- Display all existing products -->
+<h2>Existing Products</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (DinSko.Models.Product product in Model.Products)
+        {
+            <tr>
+                <td>@product.ProductId</td>
+                <td>@product.Name</td>
+                <td>@product.Description</td>
+                <td>@product.Price.ToString("0.00")</td>
+                <td>
+                    <!-- Edit product -->
+                    <form method="post" asp-page-handler="Edit" asp-route-id="@product.ProductId">
+                        <button type="submit" class="btn btn-warning btn-sm">Edit</button>
+                    </form>
+
+                    <!-- Delete product -->
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@product.ProductId"
+                          onsubmit="return confirm('Are you sure you want to delete this product?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Display the edit form when a product is selected -->
+@if (Model.EditingProductId.HasValue)
+{
+    <hr />
+
+    <h2>Edit Product</h2>
+
+    <form method="post" asp-page-handler="Update">
+        <input type="hidden" asp-for="EditProduct.ProductId" />
+
+        <div class="mb-3">
+            <label asp-for="EditProduct.Name" class="form-label">Product Name</label>
+            <input asp-for="EditProduct.Name" class="form-control" />
+            <span asp-validation-for="EditProduct.Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="EditProduct.Description" class="form-label">Description</label>
+            <textarea asp-for="EditProduct.Description" class="form-control"></textarea>
+            <span asp-validation-for="EditProduct.Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="EditProduct.Price" class="form-label">Price</label>
+            <input asp-for="EditProduct.Price" type="number" step="0.01" min="0.01"
+                   class="form-control" />
+            <span asp-validation-for="EditProduct.Price" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">Save Changes</button>
+        <a asp-page="/Admin/Products" class="btn btn-secondary">Cancel</a>
+    </form>
+}

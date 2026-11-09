@@ -120,7 +120,7 @@ namespace DinSko.Repositories
                     string passwordHash = Argon2.Hash(user.Password); // hash the password before storing it in the database
                     command.Parameters.AddWithValue("@Name", user.Name); // add the Name as a parameter.
                     command.Parameters.AddWithValue("@Email", user.Email); // add the Email as a parameter.
-                    command.Parameters.AddWithValue("@Role", user.Role); // add the Role as a parameter.
+                    command.Parameters.AddWithValue("@Role", (int)user.Role); // add the Role as a parameter.
                     command.Parameters.AddWithValue("@PasswordHash", passwordHash); // add the hashed Password as a parameter.
                     command.ExecuteNonQuery(); // execute the SQL command and create the user in the database
                 }

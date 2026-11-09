@@ -1,94 +1,355 @@
 ﻿@page
 @model DinSko.Pages.Cart.IndexModel
 
-<h1>My Cart</h1>
+<style>
+    /* Main cart page */
+    .cart-page {
+        background-color: #f7f7f7;
+        min-height: 650px;
+        padding: 40px 15px;
+    }
 
-@if (!string.IsNullOrEmpty(Model.Message))
-{
-    <p>@Model.Message</p>
-}
+    .cart-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
 
-@if (Model.Items.Any())
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Size</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+    .cart-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: #171717;
+        margin-bottom: 8px;
+    }
 
-        <tbody>
-            @foreach (var item in Model.Items)
+    .cart-subtitle {
+        color: #777;
+        margin-bottom: 30px;
+    }
+
+    /* Cart content card */
+    .cart-card {
+        background-color: white;
+        border-radius: 14px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .cart-table {
+        vertical-align: middle;
+        margin-bottom: 0;
+    }
+
+        .cart-table thead th {
+            color: #777;
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 15px 10px;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+        }
+
+        .cart-table tbody td {
+            padding: 18px 10px;
+            color: #333;
+        }
+
+    .cart-product-name {
+        font-weight: 700;
+        color: #171717;
+    }
+
+    .cart-price {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .cart-quantity-form {
+        min-width: 175px;
+    }
+
+    .cart-quantity-input {
+        max-width: 75px;
+        border-radius: 7px;
+    }
+
+    .cart-stock {
+        display: block;
+        color: #888;
+        font-size: 12px;
+        margin-top: 6px;
+    }
+
+    /* Action buttons */
+    .update-button {
+        background-color: #171717;
+        color: white;
+        border: none;
+        border-radius: 7px;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+        .update-button:hover {
+            background-color: #444;
+            color: white;
+        }
+
+    .remove-button {
+        border-radius: 7px;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    /* Cart summary */
+    .cart-summary {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 20px;
+        border-top: 1px solid #eee;
+        margin-top: 20px;
+        padding-top: 20px;
+    }
+
+    .cart-total-label {
+        color: #666;
+        font-size: 16px;
+    }
+
+    .cart-total-price {
+        font-size: 25px;
+        font-weight: 800;
+        color: #171717;
+    }
+
+    /* Continue shopping link */
+    .continue-shopping {
+        display: inline-block;
+        margin-top: 25px;
+        color: #171717;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .continue-shopping:hover {
+            color: #c99b36;
+        }
+
+    /* Empty cart */
+    .empty-cart {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+        .empty-cart h3 {
+            font-weight: 700;
+            color: #171717;
+            margin-bottom: 12px;
+        }
+
+        .empty-cart p {
+            color: #777;
+            margin-bottom: 25px;
+        }
+
+    .shop-button {
+        display: inline-block;
+        background-color: #171717;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .shop-button:hover {
+            background-color: #444;
+            color: white;
+        }
+
+    /* Responsive layout */
+    @@media (max-width: 768px) {
+        .cart-card {
+            padding: 15px;
+        }
+
+        .cart-summary {
+            justify-content: space-between;
+        }
+
+        .cart-title {
+            font-size: 27px;
+        }
+    }
+</style>
+
+<div class="cart-page">
+
+    <div class="cart-container">
+
+        <!-- Page heading -->
+        <h1 class="cart-title">My Cart</h1>
+
+        <p class="cart-subtitle">
+            Review your selected products before checkout.
+        </p>
+
+        <!-- Display success or error messages -->
+        @if (!string.IsNullOrEmpty(Model.Message))
+        {
+            <div class="alert alert-info" role="alert">
+                @Model.Message
+            </div>
+        }
+
+        <div class="cart-card">
+
+            @if (Model.Items.Any())
             {
-                <tr>
-                    <td>@item.ProductName</td>
-                    <td>@item.Size</td>
-                    <td>
-                        <!-- Update the quantity -->
-                        <form method="post"
-                              asp-page-handler="Update"
-                              class="d-flex gap-2">
+                <!-- Cart items table -->
+                <div class="table-responsive">
 
-                            <input type="hidden"
-                                   name="itemId"
-                                   value="@item.CartItemId" />
+                    <table class="table cart-table">
 
-                            <input type="number"
-                                   name="quantity"
-                                   value="@item.Quantity"
-                                   min="1"
-                                   max="10"
-                                   class="form-control"
-                                   style="width: 90px;"
-                                   required />
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Size</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
 
-                            <button type="submit"
-                                    class="btn btn-primary">
-                                Update
-                            </button>
-                        </form>
+                        <tbody>
 
-                        <small>Available stock: @item.Stock</small>
-                    </td>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
 
-                    <td>@item.Price.ToString("0.00") DKK</td>
+                                    <!-- Product name -->
+                                    <td>
+                                        <span class="cart-product-name">
+                                            @item.ProductName
+                                        </span>
+                                    </td>
 
-                    <td>
-                        @((item.Price * item.Quantity).ToString("0.00")) DKK
-                    </td>
+                                    <!-- Selected shoe size -->
+                                    <td>
+                                        @item.Size
+                                    </td>
 
-                    <td>
-                        <!-- Remove the item from the cart -->
-                        <form method="post" asp-page-handler="Remove">
-                            <input type="hidden"
-                                   name="itemId"
-                                   value="@item.CartItemId" />
+                                    <!-- Update product quantity -->
+                                    <td>
 
-                            <button type="submit"
-                                    class="btn btn-danger">
-                                Remove
-                            </button>
-                        </form>
-                    </td>
-                </tr>
+                                        <form method="post"
+                                              asp-page-handler="Update"
+                                              class="d-flex align-items-center gap-2 cart-quantity-form">
+
+                                            <input type="hidden"
+                                                   name="itemId"
+                                                   value="@item.CartItemId" />
+
+                                            <input type="number"
+                                                   name="quantity"
+                                                   value="@item.Quantity"
+                                                   min="1"
+                                                   max="10"
+                                                   class="form-control cart-quantity-input"
+                                                   required />
+
+                                            <button type="submit"
+                                                    class="update-button">
+                                                Update
+                                            </button>
+
+                                        </form>
+
+                                        <!-- Show available stock -->
+                                        <small class="cart-stock">
+                                            Available stock: @item.Stock
+                                        </small>
+
+                                    </td>
+
+                                    <!-- Unit price -->
+                                    <td class="cart-price">
+                                        @item.Price.ToString("0.00") DKK
+                                    </td>
+
+                                    <!-- Total price for this item -->
+                                    <td class="cart-price">
+                                        @((item.Price * item.Quantity).ToString("0.00")) DKK
+                                    </td>
+
+                                    <!-- Remove product -->
+                                    <td>
+
+                                        <form method="post"
+                                              asp-page-handler="Remove">
+
+                                            <input type="hidden"
+                                                   name="itemId"
+                                                   value="@item.CartItemId" />
+
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger remove-button">
+                                                Remove
+                                            </button>
+
+                                        </form>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- Cart total -->
+                <div class="cart-summary">
+
+                    <span class="cart-total-label">
+                        Total:
+                    </span>
+
+                    <span class="cart-total-price">
+                        @Model.Items.Sum(item => item.Price * item.Quantity).ToString("0.00") DKK
+                    </span>
+
+                </div>
+
+                <!-- Continue shopping -->
+                <a asp-page="/Index" class="continue-shopping">
+                    ← Continue Shopping
+                </a>
             }
-        </tbody>
-    </table>
+            else
+            {
+                <!-- Empty cart message -->
+                <div class="empty-cart">
 
-    <h4>
-        Total:
-        @Model.Items.Sum(item => item.Price * item.Quantity).ToString("0.00")
-        DKK
-    </h4>
-}
-else
-{
-    <p>Your cart is empty.</p>
-}
+                    <h3>Your Cart is Empty</h3>
 
-<a asp-page="/Index">Continue shopping</a>
+                    <p>
+                        You haven't added any products to your cart yet.
+                    </p>
+
+                    <a asp-page="/Index" class="shop-button">
+                        Start Shopping
+                    </a>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

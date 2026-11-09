@@ -1,58 +1,84 @@
+
 using DinSko.Repositories;
 using DinSko.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// add services to the container.
 builder.Services.AddRazorPages();
 
 // store temporary login attempt data
-builder.Services.AddMemoryCache(); 
+builder.Services.AddMemoryCache();
 
 // configure cookie authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login"; // use cookies to keep the user logged in
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+
+        // log when an authenticated user is denied access
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            // get the logger from the application services
+            ILogger<Program> logger =
+                context.HttpContext.RequestServices
+                    .GetRequiredService<ILogger<Program>>();
+
+            // get the current user's ID
+            string userId = context.HttpContext.User
+                .FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                ?? "Unknown";
+
+            // log the denied access attempt
+            logger.LogWarning(
+                "Access denied for User ID {UserId} when accessing {Path}.",
+                userId,
+                context.Request.Path);
+
+            // redirect the user to the Access Denied page
+            context.Response.Redirect(context.RedirectUri);
+
+            return Task.CompletedTask;
+        };
     });
 
+// dependency injection for repositories and services
 
-// Dependency Injection for Repositories and Services
-
-// Product
+// product
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ProductService>();
 
-// ProductVariant
+// product variant
 builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
 builder.Services.AddScoped<ProductVariantService>();
 
-// Cart
+// cart
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<CartService>();
 
-// Order
+// order
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<OrderService>();
 
-// User
+// user
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 
 app.UseRouting();
-app.UseAuthentication(); // check the authentication cookie for the current user
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

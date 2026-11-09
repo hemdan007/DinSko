@@ -1,25 +1,159 @@
 ﻿@page
 @model DinSko.Pages.Account.LoginModel
 
-<h1>Login</h1>
-
-<form method="post">
-
-    <div>
-        <label asp-for="Email"></label>
-        <input asp-for="Email" type="email" />
-    </div>
-
-    <div>
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" />
-    </div>
-
-    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <p>@Model.ErrorMessage</p>
+<style>
+    /* Login page */
+    .login-page {
+        background-color: #f7f7f7;
+        min-height: 650px;
+        padding: 55px 15px;
     }
 
-    <button type="submit">Login</button>
+    /* Login card */
+    .login-card {
+        max-width: 480px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 35px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    }
 
-</form>
+    .login-title {
+        font-weight: 800;
+        color: #171717;
+        margin-bottom: 10px;
+    }
+
+    .login-subtitle {
+        color: #777;
+        margin-bottom: 30px;
+    }
+
+    .login-card .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .login-card .form-control {
+        padding: 12px 13px;
+        border-radius: 8px;
+    }
+
+        .login-card .form-control:focus {
+            border-color: #c99b36;
+            box-shadow: 0 0 0 0.2rem rgba(201, 155, 54, 0.15);
+        }
+
+    .login-button {
+        background-color: #171717;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+        .login-button:hover {
+            background-color: #444;
+            color: white;
+        }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 25px;
+        color: #777;
+    }
+
+        .login-footer a {
+            color: #171717;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+            .login-footer a:hover {
+                color: #c99b36;
+            }
+
+    @@media (max-width: 576px) {
+        .login-card {
+            padding: 25px;
+        }
+    }
+</style>
+
+<div class="login-page">
+
+    <div class="login-card">
+
+        <!-- Page heading -->
+        <h1 class="login-title">Welcome Back</h1>
+
+        <p class="login-subtitle">
+            Sign in to your DinSko account.
+        </p>
+
+        <form method="post">
+
+            <!-- Email -->
+            <div class="mb-4">
+
+                <label asp-for="Email" class="form-label">
+                    Email Address
+                </label>
+
+                <input asp-for="Email"
+                       type="email"
+                       class="form-control"
+                       autocomplete="username"
+                       placeholder="Enter your email" />
+
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+
+                <label asp-for="Password" class="form-label">
+                    Password
+                </label>
+
+                <input asp-for="Password"
+                       type="password"
+                       class="form-control"
+                       autocomplete="current-password"
+                       placeholder="Enter your password" />
+
+            </div>
+
+            <!-- Error message -->
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger">
+                    @Model.ErrorMessage
+                </div>
+            }
+
+            <!-- Login button -->
+            <button type="submit" class="login-button">
+                Login
+            </button>
+
+        </form>
+
+        <!-- Register link -->
+        <div class="login-footer">
+
+            Don't have an account?
+
+            <a asp-page="/Account/Register">
+                Create Account
+            </a>
+
+        </div>
+
+    </div>
+
+</div>

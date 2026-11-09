@@ -1,72 +1,256 @@
 ﻿@page
 @model DinSko.Pages.Account.RegisterModel
 
-<h1>Create Account</h1>
+<style>
+    /* Registration page */
+    .register-page {
+        background-color: #f7f7f7;
+        min-height: 700px;
+        padding: 45px 15px;
+    }
 
-<!-- Form sends the user data to the OnPost() method -->
-<form method="post">
+    /* Registration card */
+    .register-card {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 35px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    }
 
-    <div>
-        <!-- Label for the user's name -->
-        <label asp-for="User.Name"></label>
+    .register-title {
+        font-weight: 800;
+        color: #171717;
+        margin-bottom: 10px;
+    }
 
-        <!-- Input field for the user's name -->
-        <input asp-for="User.Name" />
-        <span asp-validation-for="User.Name"></span>
-    </div>
+    .register-subtitle {
+        color: #777;
+        margin-bottom: 30px;
+    }
 
-    <div>
-        <!-- Label and input field for the user's email -->
-        <label asp-for="User.Email"></label>
+    .register-card .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
 
-        <input asp-for="User.Email" type="email" />
-        <span asp-validation-for="User.Email"></span>
-    </div>
+    .register-card .form-control {
+        padding: 11px 13px;
+        border-radius: 8px;
+    }
 
-    <div>
-        <!-- Password input field -->
-        <label asp-for="User.Password">Password</label>
+        .register-card .form-control:focus {
+            border-color: #c99b36;
+            box-shadow: 0 0 0 0.2rem rgba(201, 155, 54, 0.15);
+        }
 
-        <input asp-for="User.Password"
-               type="password"
-               id="passwordInput"
-               autocomplete="new-password" />
+    /* Password strength section */
+    .strength-section {
+        background-color: #f8f8f8;
+        padding: 18px;
+        border-radius: 10px;
+        margin-top: 15px;
+        margin-bottom: 20px;
+    }
 
-        <span asp-validation-for="User.Password"></span>
+    .strength-title {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
 
-        <!-- Pass'O meter result -->
-        <div>
-            <p>
-                Password Strength:
-                <strong id="strengthText">Not entered</strong>
-            </p>
+    #strengthBar {
+        width: 100%;
+        height: 12px;
+        accent-color: #999999;
+    }
 
-            <!-- Visual strength indicator -->
-            <progress id="strengthBar"
-                      value="0"
-                      max="100"
-                      style="width: 250px;">
-            </progress>
+    #passwordFeedback {
+        margin-top: 12px;
+        margin-bottom: 0;
+        padding-left: 20px;
+        color: #666;
+        font-size: 14px;
+    }
 
-            <!-- Feedback to help the user improve the password -->
-            <ul id="passwordFeedback">
-                <li>Enter a password to check its strength.</li>
-            </ul>
+    .password-policy {
+        color: #777;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .register-button {
+        background-color: #171717;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+        .register-button:hover {
+            background-color: #444;
+            color: white;
+        }
+
+    .validation-message {
+        color: #dc3545;
+        font-size: 14px;
+    }
+
+    .register-footer {
+        text-align: center;
+        margin-top: 25px;
+        color: #777;
+    }
+
+        .register-footer a {
+            color: #171717;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+            .register-footer a:hover {
+                color: #c99b36;
+            }
+
+    @@media (max-width: 576px) {
+        .register-card {
+            padding: 22px;
+        }
+
+        .register-page {
+            padding: 25px 10px;
+        }
+    }
+</style>
+
+<div class="register-page">
+
+    <div class="register-card">
+
+        <!-- Page heading -->
+        <h1 class="register-title">Create Account</h1>
+
+        <p class="register-subtitle">
+            Join DinSko and discover your next favorite shoes.
+        </p>
+
+        <form method="post">
+
+            <!-- Name -->
+            <div class="mb-4">
+
+                <label asp-for="User.Name" class="form-label">
+                    Full Name
+                </label>
+
+                <input asp-for="User.Name"
+                       class="form-control"
+                       autocomplete="name"
+                       placeholder="Enter your full name" />
+
+                <span asp-validation-for="User.Name"
+                      class="validation-message"></span>
+
+            </div>
+
+            <!-- Email -->
+            <div class="mb-4">
+
+                <label asp-for="User.Email" class="form-label">
+                    Email Address
+                </label>
+
+                <input asp-for="User.Email"
+                       type="email"
+                       class="form-control"
+                       autocomplete="email"
+                       placeholder="Enter your email address" />
+
+                <span asp-validation-for="User.Email"
+                      class="validation-message"></span>
+
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+
+                <label asp-for="User.Password" class="form-label">
+                    Password
+                </label>
+
+                <input asp-for="User.Password"
+                       type="password"
+                       id="passwordInput"
+                       class="form-control"
+                       autocomplete="new-password"
+                       placeholder="Create a strong password" />
+
+                <span asp-validation-for="User.Password"
+                      class="validation-message"></span>
+
+            </div>
+
+            <!-- Password strength meter -->
+            <div class="strength-section">
+
+                <p class="strength-title">
+                    Password Strength:
+                    <strong id="strengthText">Not entered</strong>
+                </p>
+
+                <progress id="strengthBar"
+                          value="0"
+                          max="100">
+                </progress>
+
+                <ul id="passwordFeedback">
+                    <li>Enter a password to check its strength.</li>
+                </ul>
+
+            </div>
+
+            <!-- Password requirements -->
+            <div class="password-policy mb-4">
+
+                <p class="fw-semibold mb-2">
+                    Password Requirements:
+                </p>
+
+                <ul>
+                    <li>Password must be between 15 and 64 characters.</li>
+                    <li>Uppercase and lowercase letters are recommended.</li>
+                    <li>Do not use common passwords or personal information.</li>
+                    <li>Use a unique password that you do not reuse on other websites.</li>
+                </ul>
+
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="register-button">
+                Create Account
+            </button>
+
+        </form>
+
+        <!-- Login link -->
+        <div class="register-footer">
+
+            Already have an account?
+
+            <a asp-page="/Account/Login">
+                Login
+            </a>
+
         </div>
 
-        <p>
-            <!-- Password policy guidance -->
-            Password must be between 15 and 64 characters.<br />
-            Uppercase and lowercase letters are recommended.<br />
-            Do not use common passwords or personal information.<br />
-            Use a unique password that you do not reuse on other websites.
-        </p>
     </div>
 
-    <!-- Submit the form and create the account -->
-    <button type="submit">Create Account</button>
-
-</form>
+</div>
 
 @section Scripts {
     <script>

@@ -31,6 +31,9 @@ namespace DinSko.Pages.Account
                 return Page(); // return to the registration page if the data is not valid
             }
 
+            // Always register new users as Customers
+            User.Role = UserRole.Customer;
+
             _userService.Add(User); // send the user data to the UserService to create the account
 
             return RedirectToPage("/Index"); // redirect to the home page after successful registration

@@ -1,90 +1,386 @@
-﻿@page
+﻿
+@page
 @model IndexModel
 
-<h1>DinSko Products</h1>
+<style>
+    /* Main page styling */
+    .store-page {
+        background-color: #f7f7f7;
+        padding-bottom: 20px;
+    }
 
-@if (User.Identity.IsAuthenticated)
-{
-    <p>Logged in as: @User.Identity.Name</p>
-    <p><a asp-page="/Cart/Index">View My Cart</a></p>
-}
-else
-{
-    <p>Not logged in. Please log in to add products to your cart.</p>
-}
+    /* Navigation */
+    .store-navbar {
+        background-color: white;
+        border-radius: 12px;
+        padding: 12px 22px;
+        margin-bottom: 25px;
+    }
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <p>@TempData["SuccessMessage"]</p>
-}
+    .store-logo {
+        font-size: 28px;
+        font-weight: 800;
+        color: #171717;
+        text-decoration: none;
+    }
 
-@if (TempData["CartMessage"] != null)
-{
-    <p>@TempData["CartMessage"]</p>
-}
+    .store-logo:hover {
+        color: #444;
+    }
 
-@if (Model.ProductList.Any())
-{
-    <div class="row">
-        @foreach (var item in Model.ProductList)
+    /* Hero Banner */
+    .hero-section {
+        background-color: #171717;
+        border-radius: 18px;
+        overflow: hidden;
+        margin-bottom: 40px;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+    }
+
+    .hero-content {
+        padding: 40px;
+        color: white;
+        flex: 1;
+    }
+
+    .hero-content h1 {
+        font-size: 42px;
+        font-weight: 800;
+        margin-bottom: 15px;
+    }
+
+    .hero-content p {
+        color: #cccccc;
+        font-size: 17px;
+        margin-bottom: 25px;
+    }
+
+    .hero-image {
+        width: 50%;
+        height: 300px;
+        object-fit: cover;
+    }
+
+    /* Search section */
+    .search-section {
+        background-color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 35px;
+    }
+
+    /* Product cards */
+    .product-card {
+        background-color: white;
+        border: none;
+        border-radius: 14px;
+        overflow: hidden;
+        height: 100%;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.10);
+    }
+
+    .product-image-container {
+        background-color: #f5f5f5;
+        height: 230px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .product-info {
+        padding: 20px;
+    }
+
+    .product-name {
+        font-size: 19px;
+        font-weight: 700;
+    }
+
+    .product-price {
+        font-size: 20px;
+        font-weight: 700;
+        color: #171717;
+    }
+
+    .main-button {
+        background-color: #171717;
+        color: white;
+        border: none;
+    }
+
+    .main-button:hover {
+        background-color: #444;
+        color: white;
+    }
+
+    .section-title {
+        font-weight: 800;
+        margin-bottom: 25px;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 768px) {
+        .hero-section {
+            flex-direction: column;
+        }
+
+        .hero-content {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .hero-content h1 {
+            font-size: 30px;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 220px;
+        }
+    }
+</style>
+
+<div class="store-page">
+
+
+    <!-- Hero Banner -->
+    <div class="hero-section shadow-sm">
+
+        <div class="hero-content">
+
+            <h1>Step Into Style.</h1>
+
+            <p>
+                Discover your next favorite pair.
+                Quality footwear for every occasion.
+            </p>
+
+            <a href="#products"
+               class="btn btn-light btn-lg">
+                Explore Collection
+            </a>
+
+        </div>
+
+        <img src="/Images/Banner.png"
+             alt="DinSko Shoe Collection"
+             class="hero-image" />
+
+    </div>
+
+    <!-- Welcome message -->
+    @if (User.Identity.IsAuthenticated)
+    {
+        <p class="text-secondary">
+            Welcome back, @User.Identity.Name!
+        </p>
+    }
+    else
+    {
+        <p class="text-secondary">
+            Welcome to DinSko. Please log in to add products to your cart.
+        </p>
+    }
+
+    <!-- Success messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["CartMessage"] != null)
+    {
+        <div class="alert alert-info">
+            @TempData["CartMessage"]
+        </div>
+    }
+
+    <!-- Search -->
+    <div class="search-section shadow-sm">
+
+        <form method="get">
+
+            <div class="input-group">
+
+                <input type="text"
+                       name="SearchTerm"
+                       value="@Model.SearchTerm"
+                       class="form-control"
+                       placeholder="Search for shoes..." />
+
+                <button type="submit"
+                        class="btn main-button">
+                    Search
+                </button>
+
+                <a asp-page="/Index"
+                   class="btn btn-outline-secondary">
+                    Clear
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- Products -->
+    <section id="products">
+
+        <h2 class="section-title">Our Collection</h2>
+
+        @if (Model.ProductList.Any())
         {
-            <div class="col-md-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">@item.Product.Name</h5>
+            <div class="row g-4">
 
-                        <p class="card-text">
-                            @(string.IsNullOrEmpty(item.Product.Description)
-                                ? "No description available."
-                                : item.Product.Description)
-                        </p>
+                @foreach (var item in Model.ProductList)
+                {
+                    string imagePath = item.Product.Name switch
+                    {
+                        "Running Shoes" => "/Images/Running.png",
+                        "Casual Shoes" => "/Images/Casual.png",
+                        "Leather Boots" => "/Images/LeatherBoots.png",
+                        _ => "/Images/Running.png"
+                    };
 
-                        <p>
-                            <strong>Price:</strong>
-                            @item.Product.Price.ToString("0.00") DKK
-                        </p>
+                    <div class="col-md-6 col-lg-4">
 
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            @if (item.Variants.Any())
-                            {
-                                <form method="post" asp-page="/Cart/Index" asp-page-handler="Add">
-                                    <label>Size</label>
+                        <div class="product-card shadow-sm">
 
-                                    <select name="productVariantId" class="form-select">
-                                        @foreach (var variant in item.Variants)
-                                        {
-                                            <option value="@variant.ProductVariantId">
-                                                @variant.Size (Stock: @variant.Stock)
-                                            </option>
-                                        }
-                                    </select>
+                            <!-- Product image -->
+                            <div class="product-image-container">
 
-                                    <label>Quantity</label>
-                                    <input type="number"
-                                           name="quantity"
-                                           value="1"
-                                           min="1"
-                                           max="10"
-                                           class="form-control" />
+                                <img src="@imagePath"
+                                     alt="@item.Product.Name"
+                                     class="product-image" />
 
-                                    <button type="submit" class="btn btn-primary mt-2">
-                                        Add to Cart
-                                    </button>
-                                </form>
-                            }
-                            else
-                            {
-                                <p>Currently out of stock.</p>
-                            }
-                        }
+                            </div>
+
+                            <!-- Product information -->
+                            <div class="product-info">
+
+                                <h5 class="product-name">
+                                    @item.Product.Name
+                                </h5>
+
+                                <p class="text-secondary">
+                                    @(string.IsNullOrEmpty(item.Product.Description)
+                                        ? "No description available."
+                                        : item.Product.Description)
+                                </p>
+
+                                <p class="product-price">
+                                    @item.Product.Price.ToString("0.00") DKK
+                                </p>
+
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    @if (item.Variants.Any())
+                                    {
+                                        <form method="post"
+                                              asp-page="/Cart/Index"
+                                              asp-page-handler="Add">
+
+                                            <label class="form-label fw-semibold">
+                                                Select Size
+                                            </label>
+
+                                            <select name="productVariantId"
+                                                    class="form-select mb-3">
+
+                                                @foreach (var variant in item.Variants)
+                                                {
+                                                    <option value="@variant.ProductVariantId">
+                                                        @variant.Size (Stock: @variant.Stock)
+                                                    </option>
+                                                }
+
+                                            </select>
+
+                                            <label class="form-label fw-semibold">
+                                                Quantity
+                                            </label>
+
+                                            <input type="number"
+                                                   name="quantity"
+                                                   value="1"
+                                                   min="1"
+                                                   max="10"
+                                                   class="form-control mb-3" />
+
+                                            <button type="submit"
+                                                    class="btn main-button w-100">
+                                                Add to Cart
+                                            </button>
+
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-danger fw-semibold">
+                                            Currently out of stock.
+                                        </p>
+                                    }
+                                }
+                                else
+                                {
+                                    <a asp-page="/Account/Login"
+                                       class="btn main-button w-100">
+                                        Login to Purchase
+                                    </a>
+                                }
+
+                            </div>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         }
-    </div>
-}
-else
-{
-    <p>No products are currently available.</p>
-}
+        else
+        {
+            @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+            {
+                <div class="alert alert-warning">
+                    No products found matching "@Model.SearchTerm".
+                </div>
+            }
+            else
+            {
+                <p>No products are currently available.</p>
+            }
+        }
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center mt-5 py-4 border-top">
+
+        <h5 class="fw-bold">DinSko.</h5>
+
+        <p class="text-secondary mb-0">
+            Quality Shoes. Everyday Comfort.
+        </p>
+
+        <small class="text-secondary">
+            © 2026 DinSko. All rights reserved.
+        </small>
+
+    </footer>
+
+</div>

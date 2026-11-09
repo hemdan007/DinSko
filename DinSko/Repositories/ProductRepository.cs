@@ -39,6 +39,54 @@ namespace DinSko.Repositories
             return products;
         }
 
+
+        // search products by name or description
+        public IEnumerable<Product> Search(string searchTerm)
+        {
+            // create an empty list to store matching products
+            List<Product> products = new List<Product>();
+
+            // create a database connection
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                // search for products containing the search term in their name or description
+                string sql = "SELECT ProductId, Name, Description, Price " +
+                             "FROM Product " +
+                             "WHERE Name LIKE @SearchTerm OR Description LIKE @SearchTerm";
+
+                using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    // add the searchTerm as a SQL parameter to prevent SQL Injection
+                    // the % symbols allow matching text before and after the searchTerm
+                    command.Parameters.AddWithValue("@SearchTerm", "%" + searchTerm + "%");
+
+                    // execute the search query and read the matching products
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // create a Product object from the current database row
+                            Product product = new Product()
+                            {
+                                ProductId = reader.GetInt32(0),
+                                Name = reader.GetString(1),
+                                Description = reader.IsDBNull(2) ? null : reader.GetString(2),
+                                Price = reader.GetDecimal(3)
+                            };
+                            // add the matching product to the list
+                            products.Add(product);
+                        }
+                    }
+                }
+            }
+
+            // return all matching products
+            return products;
+        }
+
+
         public Product GetById(int id)
         {
             Product product = null; // initialize product to null
@@ -88,7 +136,7 @@ namespace DinSko.Repositories
             using (SqlConnection connection = new SqlConnection(_connectionString)) 
             {
                 connection.Open(); 
-                string sql = "UPDATE Product " + "SET Name = @Name, Description = @Description, Price = @Price" + 
+                string sql = "UPDATE Product " + "SET Name = @Name, Description = @Description, Price = @Price " + 
                     "WHERE ProductId = @ProductId"; // SQL query to update a product by its ID.
                 using (SqlCommand command = new SqlCommand(sql, connection)) 
                 {

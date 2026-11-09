@@ -1,3 +1,4 @@
+
 using DinSko.Services;
 using Isopoh.Cryptography.Argon2;
 using Microsoft.AspNetCore.Authorization;
@@ -11,11 +12,15 @@ namespace DinSko.Pages.Account
     [Authorize]
     public class ChangePasswordModel : PageModel
     {
-        private readonly UserService _userService; // store UserService
+        private readonly UserService _userService;
+        private readonly ILogger<ChangePasswordModel> _logger;
 
-        public ChangePasswordModel(UserService userService)
+        public ChangePasswordModel(
+            UserService userService,
+            ILogger<ChangePasswordModel> logger)
         {
-            _userService = userService; // get UserService
+            _userService = userService;
+            _logger = logger;
         }
 
         [BindProperty]
@@ -38,14 +43,14 @@ namespace DinSko.Pages.Account
 
         public void OnGet()
         {
-            // display the change password page
+            // Display the change password page
         }
 
         public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
             {
-                return Page(); // return to the page if the data is invalid
+                return Page();
             }
 
             if (NewPassword != ConfirmPassword)
@@ -54,29 +59,44 @@ namespace DinSko.Pages.Account
                 return Page();
             }
 
-            string userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userIdValue =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (!int.TryParse(userIdValue, out int userId))
             {
-                return Challenge(); // require authentication if the user ID is missing
+                return Challenge();
             }
 
-            var user = _userService.GetById(userId); // get the current user from the database
+            // get the current user from the database
+            var user = _userService.GetById(userId);
 
-            if (user == null || string.IsNullOrEmpty(user.PasswordHash) || !Argon2.Verify(user.PasswordHash, CurrentPassword))
+            if (user == null ||
+                string.IsNullOrEmpty(user.PasswordHash) ||
+                !Argon2.Verify(user.PasswordHash, CurrentPassword))
             {
+                // log failed password change
+                _logger.LogWarning(
+                    "Password change failed for User ID {UserId}: Incorrect current password.",
+                    userId);
+
                 ErrorMessage = "Current password is incorrect.";
                 return Page();
             }
 
-            string passwordHash = Argon2.Hash(NewPassword); // hash the new password before storing it
+            // hash the new password before storing it
+            string passwordHash = Argon2.Hash(NewPassword);
 
-            _userService.ChangePassword(userId, passwordHash); // update the password hash in the database
-           
+            // update the password hash in the database
+            _userService.ChangePassword(userId, passwordHash);
+
+            // log successful password change
+            _logger.LogInformation(
+                "Password changed successfully for User ID {UserId}.",
+                userId);
+
             TempData["SuccessMessage"] = "Password changed successfully.";
 
-            return RedirectToPage("/Index"); // return to the home page
-
+            return RedirectToPage("/Index");
         }
     }
 }

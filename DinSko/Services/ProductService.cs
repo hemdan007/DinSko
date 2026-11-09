@@ -10,7 +10,10 @@ namespace DinSko.Services
             _productRepository = productRepository;
         }
         public IEnumerable<Product> GetAll() { return _productRepository.GetAll(); }
-
+        public IEnumerable<Product> Search(string searchTerm)
+        {
+            return _productRepository.Search(searchTerm);
+        }
         public Product GetById(int id) { return _productRepository.GetById(id); }
 
         public void Add(Product product) { _productRepository.Add(product); }

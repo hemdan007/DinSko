@@ -10,7 +10,7 @@ namespace DinSko.Models
         [Required]
         [EmailAddress]
         public string Email { get; set; }
-        public UserRole Role { get; set; }
+        public UserRole Role { get; set; } = UserRole.Customer; //to make sure when we make a new user, to be customer not admin
         [Required]
         [StringLength(64, MinimumLength = 15,
         ErrorMessage = "Password must be between 15 and 64 characters.")]

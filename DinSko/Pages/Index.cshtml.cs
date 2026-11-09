@@ -24,6 +24,10 @@ namespace DinSko.Pages
         public IEnumerable<Product> Products { get; set; } =
             new List<Product>();
 
+        // Stores the search term entered by the user
+        [BindProperty(SupportsGet = true)]
+        public string SearchTerm { get; set; } = string.Empty;
+
         public List<ProductWithVariants> ProductList { get; set; } =
             new List<ProductWithVariants>();
 
@@ -35,7 +39,16 @@ namespace DinSko.Pages
 
         public void OnGet()
         {
-            Products = _productService.GetAll();
+            // Get all products if the search field is empty
+            if (string.IsNullOrWhiteSpace(SearchTerm))
+            {
+                Products = _productService.GetAll();
+            }
+            else
+            {
+                // Search for products using the entered search term
+                Products = _productService.Search(SearchTerm);
+            }
 
             // Get the available sizes for each product
             foreach (Product product in Products)
